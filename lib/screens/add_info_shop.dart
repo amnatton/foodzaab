@@ -20,8 +20,10 @@ class _AddInfoShopState extends State<AddInfoShop> {
 
   Future<Null> findLatLng() async {
     LocationData locationData = await findLocationData();
-    lat = locationData.latitude;
-    lng = locationData.longitude;
+    setState(() {
+      lat = locationData.latitude;
+      lng = locationData.longitude;
+    });
     print('lat = $lat, lng = $lng');
   }
 
@@ -52,7 +54,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
             MyStyle().mySizebox(),
             groupImage(),
             MyStyle().mySizebox(),
-            showMap(),
+            lat == null ? MyStyle().showProgress() : showMap(),
             MyStyle().mySizebox(),
             saveButton()
           ],
@@ -79,8 +81,17 @@ class _AddInfoShopState extends State<AddInfoShop> {
     );
   }
 
+  Set<Marker> myMarker() {
+    return <Marker>[
+      Marker(
+          markerId: MarkerId('myShop'),
+          position: LatLng(lat, lng),
+          infoWindow: InfoWindow(title: 'ร้านของคุณ', snippet: 'ละติจูด = $lat, ลองติจูด = $lng'))
+    ].toSet();
+  }
+
   Container showMap() {
-    LatLng latLng = LatLng(13.9595328, 100.5689564);
+    LatLng latLng = LatLng(lat, lng);
     CameraPosition cameraPosition = CameraPosition(
       target: latLng,
       zoom: 16.0,
@@ -91,6 +102,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
         initialCameraPosition: cameraPosition,
         mapType: MapType.normal,
         onMapCreated: (controller) {},
+        markers: myMarker(),
       ),
     );
   }
