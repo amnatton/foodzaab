@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:foodzaab/utility/my_style.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
 
 class AddInfoShop extends StatefulWidget {
@@ -11,6 +14,7 @@ class AddInfoShop extends StatefulWidget {
 class _AddInfoShopState extends State<AddInfoShop> {
   // Field
   double lat, lng;
+  File file;
   @override
   void initState() {
     // TODO: implement initState
@@ -86,7 +90,8 @@ class _AddInfoShopState extends State<AddInfoShop> {
       Marker(
           markerId: MarkerId('myShop'),
           position: LatLng(lat, lng),
-          infoWindow: InfoWindow(title: 'ร้านของคุณ', snippet: 'ละติจูด = $lat, ลองติจูด = $lng'))
+          infoWindow: InfoWindow(
+              title: 'ร้านของคุณ', snippet: 'ละติจูด = $lat, ลองติจูด = $lng'))
     ].toSet();
   }
 
@@ -131,6 +136,19 @@ class _AddInfoShopState extends State<AddInfoShop> {
         ),
       ],
     );
+  }
+
+  Future<Null> chooseImage(ImageSource imageSource) async {
+    try {
+      var object = await ImagePicker.pickImage(
+        source: imageSource,
+        maxHeight: 800.0,
+        maxWidth: 800.0,
+      );
+      setState(() {
+        file = object;
+      });
+    } catch (e) {}
   }
 
   Widget nameForm() => Row(
