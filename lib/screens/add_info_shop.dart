@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:foodzaab/utility/my_style.dart';
+import 'package:foodzaab/utility/normal_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
@@ -15,6 +16,8 @@ class _AddInfoShopState extends State<AddInfoShop> {
   // Field
   double lat, lng;
   File file;
+  String nameShop, address, phone;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -72,7 +75,16 @@ class _AddInfoShopState extends State<AddInfoShop> {
       width: MediaQuery.of(context).size.width,
       child: RaisedButton.icon(
         color: MyStyle().primaryColor,
-        onPressed: () {},
+        onPressed: () {
+          if (nameShop == null ||
+              nameShop.isEmpty ||
+              address == null ||
+              address.isEmpty ||
+              phone == null ||
+              phone.isEmpty) {
+            normalDialog(context, 'กรุณากรอกข้อมูลให้ครบทุกช่องค่ะ');
+          }
+        },
         icon: Icon(
           Icons.save,
           color: Colors.white,
@@ -121,18 +133,20 @@ class _AddInfoShopState extends State<AddInfoShop> {
             Icons.add_a_photo,
             size: 36.0,
           ),
-          onPressed: () {},
+          onPressed: () => chooseImage(ImageSource.camera),
         ),
         Container(
           width: 250.0,
-          child: Image.asset('images/myimage.png'),
+          child: file == null
+              ? Image.asset('images/myimage.png')
+              : Image.file(file),
         ),
         IconButton(
           icon: Icon(
             Icons.add_photo_alternate,
             size: 36.0,
           ),
-          onPressed: () {},
+          onPressed: () => chooseImage(ImageSource.gallery),
         ),
       ],
     );
@@ -141,6 +155,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
   Future<Null> chooseImage(ImageSource imageSource) async {
     try {
       var object = await ImagePicker.pickImage(
+        //18/09/2563
         source: imageSource,
         maxHeight: 800.0,
         maxWidth: 800.0,
@@ -157,6 +172,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
           Container(
             width: 250.0,
             child: TextField(
+              onChanged: (value) => nameShop = value.trim(),
               decoration: InputDecoration(
                 labelText: 'ชื่อร้านค้า :',
                 prefixIcon: Icon(Icons.account_box),
@@ -173,6 +189,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
           Container(
             width: 250.0,
             child: TextField(
+              onChanged: (value) => address = value.trim(),
               decoration: InputDecoration(
                 labelText: 'ที่อยู่ร้านค้า :',
                 prefixIcon: Icon(Icons.home),
@@ -189,6 +206,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
           Container(
             width: 250.0,
             child: TextField(
+              onChanged: (value) => phone = value.trim(),
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 labelText: 'เบอร์โทรร้านค้า :',
