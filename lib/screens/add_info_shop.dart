@@ -1,6 +1,9 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:foodzaab/utility/my_constant.dart';
 import 'package:foodzaab/utility/my_style.dart';
 import 'package:foodzaab/utility/normal_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -16,7 +19,7 @@ class _AddInfoShopState extends State<AddInfoShop> {
   // Field
   double lat, lng;
   File file;
-  String nameShop, address, phone;
+  String nameShop, address, phone, urlImage;
 
   @override
   void initState() {
@@ -82,7 +85,11 @@ class _AddInfoShopState extends State<AddInfoShop> {
               address.isEmpty ||
               phone == null ||
               phone.isEmpty) {
-            normalDialog(context, 'กรุณากรอกข้อมูลให้ครบทุกช่องค่ะ');
+            normalDialog(context, 'กรุณากรอกข้อมูลให้ครบค่ะ');
+          } else if (file == null) {
+            normalDialog(context, 'กรุณาเลือกรูปภาพด้วยค่ะ');
+          } else {
+            uploadImage();
           }
         },
         icon: Icon(
@@ -95,6 +102,24 @@ class _AddInfoShopState extends State<AddInfoShop> {
         ),
       ),
     );
+  }
+
+  Future<Null> uploadImage() async {
+    Random random = Random();
+    int i = random.nextInt(100000);
+    String nameImage = 'shop$i.jpg';
+    String url = '${MyConstant().domain}/foodzaab/saveShop.php';
+    try {
+      Map<String, dynamic> map = Map();
+      map['file'] =
+          await MultipartFile.fromFile(file.path, filename: nameImage);
+      FormData formData = FormData.fromMap(map);
+      await Dio().post(url, data: formData).then((value) {
+        print('Response ==>> $value');
+        urlImage = '${MyConstant().domain}/foodzaab/shop/$nameImage';
+        print('urlImage = $urlImage');
+      });
+    } catch (e) {}
   }
 
   Set<Marker> myMarker() {
