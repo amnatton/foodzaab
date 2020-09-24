@@ -9,6 +9,7 @@ import 'package:foodzaab/utility/normal_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddInfoShop extends StatefulWidget {
   @override
@@ -118,8 +119,27 @@ class _AddInfoShopState extends State<AddInfoShop> {
         print('Response ==>> $value');
         urlImage = '${MyConstant().domain}/foodzaab/shop/$nameImage';
         print('urlImage = $urlImage');
+        editUserShop();
       });
     } catch (e) {}
+  }
+
+  Future<Null> editUserShop() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String id = preferences.getString('id');
+    /*
+    double lat, lng;
+    String nameShop, address, phone, urlImage;
+    */
+    String url =
+        '${MyConstant().domain}/foodzaab/editUserWhereId.php?isAdd=true&id=$id&NameShop=$nameShop&Address=$address&Phone=$phone&UrlPicture=$urlImage&Lat=$lat&Lng=$lng';
+    await Dio().get(url).then((value) {
+      if (value.toString() == 'true') {
+        Navigator.pop(context);
+      } else {
+        normalDialog(context, 'บันทึกไม่สำเร็จค่ะ');
+      }
+    });
   }
 
   Set<Marker> myMarker() {
