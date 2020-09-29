@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:foodzaab/model/user_model.dart';
 import 'package:foodzaab/screens/add_info_shop.dart';
+import 'package:foodzaab/screens/edit_info_shop.dart';
 import 'package:foodzaab/utility/my_constant.dart';
 import 'package:foodzaab/utility/my_style.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -42,9 +43,10 @@ class _InformationShopState extends State<InformationShop> {
   }
 
   void routeToAddInfo() {
-    print('routeToAddInfo Work');
+    //print('routeToAddInfo Work');
+    Widget widget = userModel.nameShop.isEmpty ? AddInfoShop() : EditInfoShop();
     MaterialPageRoute materialPageRoute = MaterialPageRoute(
-      builder: (context) => AddInfoShop(),
+      builder: (context) => widget,
     );
     Navigator.push(context, materialPageRoute);
   }
@@ -66,6 +68,7 @@ class _InformationShopState extends State<InformationShop> {
   Widget showListInfoShop() => Column(
         children: <Widget>[
           MyStyle().showTitleH2('ร้าน: ${userModel.nameShop}'),
+          showImage(),
           Row(
             children: [
               MyStyle().showTitleH2('ที่อยู่: '),
@@ -77,8 +80,18 @@ class _InformationShopState extends State<InformationShop> {
             ],
           ),
           showMap(),
+          MyStyle().mySizebox(),
         ],
       );
+
+  Container showImage() {
+    return Container(
+      width: 200.0,
+      height: 200.0,
+      child: Image.network(userModel.urlPicture),
+    );
+  }
+
   Set<Marker> shopMarker() {
     return <Marker>[
       Marker(
@@ -99,9 +112,9 @@ class _InformationShopState extends State<InformationShop> {
     double lng = double.parse(userModel.lng);
     LatLng latLng = LatLng(lat, lng);
     CameraPosition position = CameraPosition(target: latLng, zoom: 16.0);
-    return Container(
-      padding: EdgeInsets.all(10.0),
-      height: 300.0,
+    return Expanded(
+      //padding: EdgeInsets.all(10.0),
+      //height: 300.0,
       child: GoogleMap(
         initialCameraPosition: position,
         mapType: MapType.normal,
