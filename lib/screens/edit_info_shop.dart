@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ import 'package:foodzaab/utility/my_constant.dart';
 import 'package:foodzaab/utility/my_style.dart';
 import 'package:foodzaab/utility/normal_dialog.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +23,7 @@ class _EditInfoShopState extends State<EditInfoShop> {
   String nameShop, address, phone, urlPicture;
   Location location = Location();
   double lat, lng;
+  File file;
   @override
   void initState() {
     // TODO: implement initState
@@ -132,8 +136,23 @@ class _EditInfoShopState extends State<EditInfoShop> {
   }
 
   Future<Null> editThread() async {
+    Random random = Random();
+    int i = random.nextInt(100000);
+    String nameFile = 'editShop$i.jpg';
+    if (file != null) {
+      Map<String, dynamic> map = Map();
+      map['file'] = await MultipartFile.fromFile(file.path, filename: nameFile);
+      FormData formData = FormData.fromMap(map);
+      String urlUpload = '${MyConstant().domain}/foodzaab/saveShop.php';
+      await Dio().post(urlUpload, data: formData).then((value) async {});
+
+      urlPicture = '${MyConstant().domain}/foodzaab/shop/$nameFile';
+    } else {
+      urlPicture = userModel.urlPicture;
+    }
+
     String id = userModel.id;
-    print('id = $id');
+    //print('id = $id');
     String url =
         '${MyConstant().domain}/foodzaab/editUserWhereId.php?isAdd=true&id=$id&NameShop=$nameShop&Address=$address&Phone=$phone&UrlPicture=$urlPicture&Lat=$lat&Lng=$lng';
 
@@ -177,16 +196,35 @@ class _EditInfoShopState extends State<EditInfoShop> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            IconButton(icon: Icon(Icons.add_a_photo), onPressed: null),
+            IconButton(
+              icon: Icon(Icons.add_a_photo),
+              onPressed: () => chooseImage(ImageSource.camera),
+            ),
             Container(
               width: 250.0,
               height: 250.0,
-              child: Image.network(urlPicture),
+              child:
+                  file == null ? Image.network(urlPicture) : Image.file(file),
             ),
-            IconButton(icon: Icon(Icons.add_photo_alternate), onPressed: null),
+            IconButton(
+              icon: Icon(Icons.add_photo_alternate),
+              onPressed: () => chooseImage(ImageSource.gallery),
+            ),
           ],
         ),
       );
+  Future<Null> chooseImage(ImageSource source) async {
+    try {
+      var object = await ImagePicker.pickImage(
+        source: source,
+        maxWidth: 800.0,
+        maxHeight: 800.0,
+      );
+      setState(() {
+        file = object;
+      });
+    } catch (e) {}
+  }
 
   Widget nameShopForm() => Row(
         mainAxisAlignment: MainAxisAlignment.center,
